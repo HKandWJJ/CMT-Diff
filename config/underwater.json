@@ -1,0 +1,116 @@
+{
+    "name": "sr_ffhq",
+    "phase": "train", // train or val
+    "gpu_ids": [
+        0
+    ],
+    "path": { //set the path
+        "stage": "train", //change train or val folder to save
+        "log": "logs",
+        "tb_logger": "tb_logger",
+        "results": "results",
+        "UWnet_results": "UWnet_results",
+        "checkpoint": "checkpoint",
+        "UWnet_checkpoint": "UWnet_checkpoint",
+        "resume_state": null,
+        "UWnet_resume_state": null
+        // "resume_state": "experiments/UIEB_E17267", //预训练模型或训练状态
+        // "UWnet_resume_state": "experiments/epoch_17267.pth"
+    },
+    "datasets": {
+        "train": {
+            "labeled":{
+                "name": "Water",
+                "dataroot": "dataset/UIEB/labeled",
+                "datatype": "img", //lmdb or img, img文件的路径
+                "l_resolution": 16, // 低分辨率 need to super_resolution
+                "r_resolution": 256, // 高分辨率
+                "batch_size": 6,
+                "num_workers": 8,
+                "use_shuffle": true,
+                "data_len": -1 // -1表示训练中使用的所有数据
+            },
+            "unlabeled":{
+                "name": "Water",
+                "dataroot": "dataset/UIEB/unlabeled",
+                "datatype": "img", //lmdb or img, img文件的路径
+                "l_resolution": 16, // 低分辨率 need to super_resolution
+                "r_resolution": 256, // 高分辨率
+                "batch_size": 6,
+                "num_workers": 8,
+                "use_shuffle": true,
+                "data_len": -1 // -1表示训练中使用的所有数据
+            }
+            
+        },
+        "val": {
+            "name": "Water",
+            "dataroot": "dataset/UIEB/val",
+            "datatype": "img", //lmdb or img, img文件的路径
+            "l_resolution": 16,
+            "r_resolution": 256,
+            "data_len": -1 // validation中的数据长度
+        }
+    },
+    "model": {
+        "teacher_student": ["teacher", "student"], // teacher or student
+        "which_model_G": "trans", // 采用DDPM或sr3网络结构
+        "finetune_norm": false,
+        "unet": {
+            "in_channel": 6,
+            "out_channel": 3,
+            "inner_channel": 16,
+            "norm_groups": 16,
+            "channel_multiplier": [
+                1,
+                2,
+                4,
+                8,
+                16
+            ],
+            "attn_res": [
+                16
+            ],
+            "res_blocks": 2,
+            "dropout": 0.2
+        },
+        "beta_schedule": { // use munual beta_schedule for acceleration
+            "train": {
+                "schedule": "linear",
+                "n_timestep": 2000,
+                "linear_start": 1e-6,
+                "linear_end": 1e-2
+            },
+            "val": {
+                "schedule": "linear",
+                "n_timestep": 2000,
+                "linear_start": 1e-6,
+                "linear_end": 1e-2
+            }
+        },
+        "diffusion": {
+            "image_size": 256,
+            "channels": 3, //sample channel
+            "conditional": true // unconditional generation or unconditional generation(super_resolution)
+        }
+    },
+    "train": {
+        "n_iter": 2000000,
+        "val_freq": 5000,
+        "save_checkpoint_freq": 5000,
+        "print_freq": 1,
+        "optimizer": {
+            "type": "adam",
+            "lr": 1e-4
+        },
+        "UWnet_lr": 2e-4,
+        "ema_scheduler": { // not used now
+            "step_start_ema": 5000,
+            "update_ema_every": 1,
+            "ema_decay": 0.9999
+        }
+    },
+    "wandb": {
+        "project": "sr_ffhq"
+    }
+}
