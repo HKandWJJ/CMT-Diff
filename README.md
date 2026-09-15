@@ -1,6 +1,6 @@
 This repository is associated with our manuscript:
 
-## CMT-Diff: Cascaded Mean-Teacher Diffusion for Semi-Supervised Underwater Image Restoration**
+## CMT-Diff: Cascaded Mean-Teacher Diffusion for Semi-Supervised Underwater Image Restoration
 
 ## Overview
 
